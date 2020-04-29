@@ -1,11 +1,19 @@
 package Mensajes;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Mensajes implements Serializable{
 	private String nick;
 	private String ip;
 	private String mensaje;
+	private ArrayList<String> ips;
+	public ArrayList<String> getIps() {
+		return ips;
+	}
+	public void setIps(ArrayList<String> ips) {
+		this.ips = ips;
+	}
 	public Mensajes() {
 		// TODO Auto-generated constructor stub
 	}

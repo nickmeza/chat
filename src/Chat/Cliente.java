@@ -3,6 +3,8 @@ package Chat;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -37,20 +39,34 @@ class MarcoCliente extends JFrame{
 		setBounds(600,300,280,350);
 				
 		LaminaMarcoCliente milamina=new LaminaMarcoCliente();
-		
-        String []  listData = {"sd","sd"};
-        
-        list = new JList<String>(listData);
-		
-		list.setListData(listData);
-		
-		list.setVisibleRowCount(3);
-		
 		add(milamina);
 		
 		setVisible(true);
+		
+		addWindowListener(new Usuario_conectado());
+		
 		}	
-	private JList<String> list;
+	
+}
+class Usuario_conectado extends WindowAdapter{
+
+	public void windowOpened(WindowEvent e) {
+		
+		try {
+			Socket misocket = new Socket("162.15.15.20",1324);
+			Mensajes status_activo = new Mensajes();
+			status_activo.setMensaje("conectado");
+			status_activo.setNick("[SERVIDOR: ]");
+			ObjectOutputStream conectado=new ObjectOutputStream(misocket.getOutputStream());
+			conectado.writeObject(status_activo);
+			misocket.close();
+			System.out.println("llegue hasta el final");
+		} catch (Exception e2) {
+			e2.printStackTrace();
+			// TODO: handle exception
+		}
+		
+	}
 	
 }
 //runable es un hilo que sirve poara que se ejecute cosas en segundo plano
@@ -58,10 +74,15 @@ class LaminaMarcoCliente extends JPanel implements Runnable{
 	
 	public LaminaMarcoCliente(){
 		
-		nick=new JTextField(5);
+username = JOptionPane.showInputDialog("Nombre: ");
+		
+		nick=new JLabel();
+		
+		nick.setText("Nick "+username);
+		
 		add(nick);
 		
-		JLabel texto=new JLabel("--CHAT--");
+		JLabel texto=new JLabel("Conectados");
 		
 		add(texto);
 		
@@ -69,7 +90,14 @@ class LaminaMarcoCliente extends JPanel implements Runnable{
 		
 		Chat=new JTextArea(12,20);
 
-		ip=new JTextField(8);
+		ip=new JComboBox();
+		
+		ip.addItem("usuario 1");
+		
+		ip.addItem("usuario 2");
+		
+		ip.addItem("usuario 3");
+		
 		add(ip);
 		
 		add(Chat);
@@ -100,12 +128,12 @@ class LaminaMarcoCliente extends JPanel implements Runnable{
 			Chat.append("\n"+campo1.getText());
 			
 			try {
-				Socket misocket = new Socket("162.15.15.21",1324);
+				Socket misocket = new Socket("162.15.15.20",1324);
 				//creamos al usuario
 				Mensajes datos = new Mensajes();
 				
-				datos.setNick(nick.getText());
-				datos.setIp(ip.getText());
+				datos.setNick(nick.getText().substring(5));
+				datos.setIp(ip.getSelectedItem().toString());
 				datos.setMensaje(campo1.getText());
 				
 				//obtenemos los objetos y lo ponemos en el socket
@@ -159,17 +187,17 @@ class LaminaMarcoCliente extends JPanel implements Runnable{
 		}
 	}
 		
-	private JTextField campo1,nick,ip;
+	private JTextField campo1;
+	private String username;
+	private JComboBox<String> ip;
+	
+	public JLabel nick;
 	
 	private JButton miboton;
 	
 	private JTextArea Chat;
-
-	
-	
 	
 }
-
 
 
 

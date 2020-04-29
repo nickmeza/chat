@@ -9,8 +9,11 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Servidor  {
 
@@ -23,8 +26,10 @@ public class Servidor  {
 			
 	}	
 }
+
 //runable es un hilo que sirve poara que se ejecute cosas en segundo plano
 class MarcoServidor extends JFrame implements Runnable{
+	
 	
 	public MarcoServidor(){
 		
@@ -57,13 +62,12 @@ class MarcoServidor extends JFrame implements Runnable{
 			ServerSocket servidor = new ServerSocket(1324);
 			
 			String nick, ip, mensaje;
-			
+			ArrayList<String> ips = new ArrayList<>();
 			Mensajes paquete_recibido;
 			
 			while(true) {
 				
 			Socket misocket= servidor.accept();
-			
 			ObjectInputStream datos_entrantes = new ObjectInputStream(misocket.getInputStream());
 			//alamacenamos los datos del mesnaje
 			paquete_recibido=(Mensajes) datos_entrantes.readObject();
@@ -72,27 +76,51 @@ class MarcoServidor extends JFrame implements Runnable{
 			ip=paquete_recibido.getIp();
 			mensaje=paquete_recibido.getMensaje();
 			
-			areatexto.append("\n"+nick+":  "+mensaje+" para: "+ip);
-			//cremos el socket que mandara el mensaje
-			System.out.println(ip);
-			
-			Socket Envia_Usuario = new Socket(ip, 8080);
-			
-			ObjectOutputStream dardatos= new ObjectOutputStream(Envia_Usuario.getOutputStream());
-			
-			dardatos.writeObject(paquete_recibido);
-			
-			dardatos.close();
-			
-			Envia_Usuario.close();
-			
-			misocket.close();
-			
+			if (!mensaje.equals("conectado")) {
+				
+				areatexto.append("\n"+nick+":  "+mensaje+" para: "+ip);
+				//cremos el socket que mandara el mensaje
+				System.out.println(ip);
+				
+				Socket Envia_Usuario = new Socket(ip, 8080);
+				
+				ObjectOutputStream dardatos= new ObjectOutputStream(Envia_Usuario.getOutputStream());
+				
+				dardatos.writeObject(paquete_recibido);
+				
+				dardatos.close();
+				
+				Envia_Usuario.close();
+				
+				misocket.close();
+				}else {
+					InetAddress mi_ip = misocket.getInetAddress();
+					String ipremota = mi_ip.getHostAddress();
+					ips.add(ipremota);
+					paquete_recibido.setIps(ips);
+					areatexto.append("\n"+nick+":  "+mensaje+" para: "+ip);
+					for (String ip1 : ips) {
+						System.out.println(ip1);
+						Socket Envia_Usuario = new Socket(ip1, 8080);
+						
+						ObjectOutputStream dardatos= new ObjectOutputStream(Envia_Usuario.getOutputStream());
+						
+						dardatos.writeObject(paquete_recibido);
+						
+						dardatos.close();
+						
+						Envia_Usuario.close();
+						
+						misocket.close();
+						
+					}
+				}
 			}
 			
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println(e.getMessage());
 			
 		}
 		
