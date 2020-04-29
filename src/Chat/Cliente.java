@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import javax.swing.*;
 
@@ -91,12 +92,6 @@ username = JOptionPane.showInputDialog("Nombre: ");
 		Chat=new JTextArea(12,20);
 
 		ip=new JComboBox();
-		
-		ip.addItem("usuario 1");
-		
-		ip.addItem("usuario 2");
-		
-		ip.addItem("usuario 3");
 		
 		add(ip);
 		
@@ -178,7 +173,17 @@ username = JOptionPane.showInputDialog("Nombre: ");
 				
 				mensajes_recibidos = (Mensajes) entrada.readObject();
 				
-				Chat.append("\n"+ mensajes_recibidos.getNick()+": "+mensajes_recibidos.getMensaje());
+				if (!mensajes_recibidos.getMensaje().equals("conectado")) {
+					Chat.append("\n"+ mensajes_recibidos.getNick()+": "+mensajes_recibidos.getMensaje());
+					
+				} else {
+					ArrayList<String> ipsbox = new ArrayList<String>();
+					this.ip.removeAllItems();
+					for (String ip1 : mensajes_recibidos.getIps()) {
+						this.ip.addItem(ip1);
+					}
+
+				}
 			}
 			
 		} catch (Exception e) {
